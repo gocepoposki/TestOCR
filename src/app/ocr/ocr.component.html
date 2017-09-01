@@ -1,0 +1,55 @@
+<!--<image-upload-->
+<!--[buttonCaption]="'Одбери слика'"-->
+<!--[dropBoxMessage]="'Овде влечи и пушти!'"-->
+<!--[max]="1"-->
+<!--(onFileUploadFinish)="imageFinishedUploading($event)"-->
+<!--(onRemove)="imageRemoved($event)"-->
+<!--(isPending)="uploadStateChange($event)"-->
+<!--&gt;</image-upload>-->
+<div class="container" style="position: center">
+  <div class="row">
+    <img [src]="this.url" #scannedImg id="scream">
+    <input type='file' (change)="readUrl($event)">
+    <!--<img src="../../assets/test_015.jpg" id="scream"> <br>-->
+
+    <canvas id="myCanvas" #myCanvas></canvas>
+
+    <select type="number" [(ngModel)]="levelNum" (ngModelChange)="selectLanguage()">
+      <option *ngFor="let item of languages" [ngValue]="item.lang">{{item.name}}</option>
+    </select>
+    {{levelNum}}
+
+    <button (click)="runOCR()">OCR</button>
+    <button (click)="detectOCR()">DetectOCR</button>
+
+    <button (click)="test()">test</button>
+    <button (click)="testCanvas()">testCanvas</button>
+    <button (click)="testCanvas1()">testCanvas1</button>
+    <button (click)="testCanvas2()">testCanvas2</button>
+
+
+    <div>
+      <h1 *ngIf="status != null">{{ status?.status}} : {{ status?.progress | percent: '1.0-0' }}</h1>
+      <!--<div contenteditable="true">{{recognizedText}}</div>-->
+      {{prepoznavanje}}
+    </div>
+
+
+    <!--<input [(ngModel)]="recognizedText">-->
+    <textarea [(ngModel)]="recognizedText" rows="20" cols="150"></textarea>
+
+    <div>
+      <img-cropper [image]="data" [settings]="cropperSettings"></img-cropper><br>
+      <img [src]="data.image" [width]="cropperSettings.croppedWidth" [height]="cropperSettings.croppedHeight">
+    </div>
+
+    <img-cropper [image]="data1" [settings]="cropperSettings1" (onCrop)="cropped($event)"></img-cropper>
+    <span class="result" *ngIf="data1.image" >
+        <img [src]="data1.image"
+             [width]="croppedWidth"
+             [height]="croppedHeight">
+        {{data1.image.length}}
+    </span>
+
+  </div>
+</div>
