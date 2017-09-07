@@ -8,11 +8,13 @@
 <!--&gt;</image-upload>-->
 <div class="container" style="position: center">
   <div class="row">
-    <img [src]="this.url" #scannedImg id="scream">
-    <input type='file' (change)="readUrl($event)">
+    <img [src]="url"  #scannedImg id="scream"><br/>
+    <!--<img [src]="url"  #scannedImg id="scream" style="filter: grayscale(100%) contrast(200%) brightness(250%)">-->
+    <input type='file' (change)="readUrl($event)"><br/>
     <!--<img src="../../assets/test_015.jpg" id="scream"> <br>-->
 
-    <canvas id="myCanvas" #myCanvas></canvas>
+    <canvas id="myCanvas" #myCanvas></canvas><br/>
+
 
     <select type="number" [(ngModel)]="levelNum" (ngModelChange)="selectLanguage()">
       <option *ngFor="let item of languages" [ngValue]="item.lang">{{item.name}}</option>
@@ -23,6 +25,10 @@
     <button (click)="detectOCR()">DetectOCR</button>
 
     <button (click)="test()">test</button>
+    <button (click)="test2()">test2</button>
+    <button (click)="test3()">test3</button>
+
+
     <button (click)="testCanvas()">testCanvas</button>
     <button (click)="testCanvas1()">testCanvas1</button>
     <button (click)="testCanvas2()">testCanvas2</button>
@@ -38,18 +44,6 @@
     <!--<input [(ngModel)]="recognizedText">-->
     <textarea [(ngModel)]="recognizedText" rows="20" cols="150"></textarea>
 
-    <div>
-      <img-cropper [image]="data" [settings]="cropperSettings"></img-cropper><br>
-      <img [src]="data.image" [width]="cropperSettings.croppedWidth" [height]="cropperSettings.croppedHeight">
-    </div>
-
-    <img-cropper [image]="data1" [settings]="cropperSettings1" (onCrop)="cropped($event)"></img-cropper>
-    <span class="result" *ngIf="data1.image" >
-        <img [src]="data1.image"
-             [width]="croppedWidth"
-             [height]="croppedHeight">
-        {{data1.image.length}}
-    </span>
 
   </div>
 </div>

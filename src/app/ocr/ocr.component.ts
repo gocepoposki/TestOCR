@@ -3,9 +3,6 @@ import {Observable} from 'rxjs/Observable';
 import * as Tesseract from 'tesseract.js';
 import {FileHolder} from "angular2-image-upload/lib/image-upload/image-upload.component";
 import * as smartcrop from '../../../node_modules/smartcrop/smartcrop.js';
-import {ImageCropperComponent, CropperSettings, Bounds} from 'ng2-img-cropper';
-// import fs from 'fs';
-// import Canvas from 'canvas';
 
 
 // import 'rxjs/add/observable/of';
@@ -17,48 +14,8 @@ import {ImageCropperComponent, CropperSettings, Bounds} from 'ng2-img-cropper';
 })
 export class OcrComponent implements OnInit {
   constructor(private cdRef: ChangeDetectorRef) {
-    this.cropperSettings = new CropperSettings();
-    this.cropperSettings.width = 100;
-    this.cropperSettings.height = 100;
-    this.cropperSettings.croppedWidth =100;
-    this.cropperSettings.croppedHeight = 100;
-    this.cropperSettings.canvasWidth = 400;
-    this.cropperSettings.canvasHeight = 300;
 
-    this.data = {};
-
-
-    this.name = 'Angular2'
-    this.cropperSettings1 = new CropperSettings();
-    this.cropperSettings1.width = 500;
-    this.cropperSettings1.height = 500;
-
-    this.cropperSettings1.croppedWidth = 1000;
-    this.cropperSettings1.croppedHeight = 1000;
-
-    this.cropperSettings1.canvasWidth = 500;
-    this.cropperSettings1.canvasHeight = 300;
-
-    this.cropperSettings1.minWidth = 1;
-    this.cropperSettings1.minHeight = 1;
-
-    this.cropperSettings1.rounded = false;
-    this.cropperSettings1.keepAspect = true;
-
-    this.cropperSettings1.cropperDrawSettings.strokeColor = 'rgba(255,255,255,1)';
-    this.cropperSettings1.cropperDrawSettings.strokeWidth = 2;
-
-    this.data1 = {};
   }
-  data: any;
-  cropperSettings: CropperSettings;
-
-  name:string;
-  data1:any;
-  cropperSettings1:CropperSettings;
-  croppedWidth:number;
-  croppedHeight:number;
-
 
   status: any;
   recognizedText: any;
@@ -92,36 +49,16 @@ export class OcrComponent implements OnInit {
   @ViewChild('scannedImg') private scannedImg: ElementRef;
   @ViewChild('myCanvas') private myCanvas: ElementRef;
   public context: CanvasRenderingContext2D;
-  @ViewChild('cropper', undefined) cropper:ImageCropperComponent;
 
   ngOnInit() {
   }
 
-  cropped(bounds:Bounds) {
-    this.croppedHeight =bounds.bottom-bounds.top;
-    this.croppedWidth = bounds.right-bounds.left;
-  }
 
-  fileChangeListener($event) {
-    var image:any = new Image();
-    var file:File = $event.target.files[0];
-    var myReader:FileReader = new FileReader();
-    var that = this;
-    myReader.onloadend = function (loadEvent:any) {
-      image.src = loadEvent.target.result;
-      that.cropper.setImage(image);
-
-    };
-
-    myReader.readAsDataURL(file);
-  }
-
-
-  test() {
-    smartcrop.crop('../../assets/mak.jpg', {width: 100, height: 100}, result =>
-      console.log(result)
-    );
-  }
+  // test() {
+  //   smartcrop.crop('../../assets/mak.jpg', {width: 100, height: 100}, result =>
+  //     console.log(result)
+  //   );
+  // }
 
   testCanvas() {
     var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('myCanvas');
@@ -252,6 +189,108 @@ export class OcrComponent implements OnInit {
     }
   }
 
+
+
+
+
+  test(){
+    //create canvas
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('myCanvas');
+    //get its context
+    var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+    //start to load image from src url
+    this.img = document.getElementById("scream");
+    //resize canvas up to size image size
+    canvas.width = this.img.width;
+    canvas.height = this.img.height;
+    //draw image on canvas, full canvas API is described here http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
+    ctx.drawImage(this.img, 0, 0);
+    //get array of image pixels
+    var imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    //run through all the pixels
+    for(var y = 0; y < imgPixels.height; y++){
+      for(var x = 0; x < imgPixels.width; x++){
+        //here is x and y are multiplied by 4 because every pixel is four bytes: red, green, blue, alpha
+        var i = (y * 4) * imgPixels.width + x * 4; //Why is this multiplied by 4?
+        //compute average value for colors, this will convert it to bw
+        var avg = (imgPixels.data[i] + imgPixels.data[i + 1] + imgPixels.data[i + 2]) / 3;
+        //set values to array
+        imgPixels.data[i] = avg;
+        imgPixels.data[i + 1] = avg;
+        imgPixels.data[i + 2] = avg;
+      }
+    }
+    //draw pixels according to computed colors
+    ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+    // return canvas.toDataURL();
+    this.url = canvas.toDataURL();
+
+
+  }
+
+  // contrast
+  test2(){
+    //create canvas
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('myCanvas');
+    //get its context
+    var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+    //start to load image from src url
+    this.img = document.getElementById("scream");
+    //resize canvas up to size image size
+    canvas.width = this.img.width;
+    canvas.height = this.img.height;
+    //draw image on canvas, full canvas API is described here http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
+    ctx.drawImage(this.img, 0, 0);
+
+    var imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < imgPixels.data.length; i += 4) {
+      var average = Math.round((imgPixels.data[i] + imgPixels.data[i + 1] + imgPixels.data[i + 2]) / 3);
+      let contrast = 10
+      if (average > 127) {
+        imgPixels.data[i] += (imgPixels.data[i] / average) * contrast;
+        imgPixels.data[i + 1] += (imgPixels.data[i + 1] / average) * contrast;
+        imgPixels.data[i + 2] += (imgPixels.data[i + 2] / average) * contrast;
+      } else {
+        imgPixels.data[i] -= (imgPixels.data[i] / average) * contrast;
+        imgPixels.data[i + 1] -= (imgPixels.data[i + 1] / average) * contrast;
+        imgPixels.data[i + 2] -= (imgPixels.data[i + 2] / average) * contrast;
+      }
+    }
+    //draw pixels according to computed colors
+    ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+    // return canvas.toDataURL();
+    this.url = canvas.toDataURL();
+  }
+
+
+  // brightness
+  test3(){
+    //create canvas
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('myCanvas');
+    //get its context
+    var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+    //start to load image from src url
+    this.img = document.getElementById("scream");
+    //resize canvas up to size image size
+    canvas.width = this.img.width;
+    canvas.height = this.img.height;
+    //draw image on canvas, full canvas API is described here http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
+    ctx.drawImage(this.img, 0, 0);
+
+    var imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    let brightness = -10
+    for (var i = 0; i < imgPixels.data.length; i += 4) {
+      imgPixels.data[i]   -= brightness  ;
+      imgPixels.data[i+1] -= brightness  ;
+      imgPixels.data[i+2] -= brightness  ;
+    }
+
+    //draw pixels according to computed colors
+    ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+    // return canvas.toDataURL();
+    this.url = canvas.toDataURL();
+  }
 
 
 
