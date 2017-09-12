@@ -48,6 +48,8 @@ export class OcrComponent implements OnInit {
 
   @ViewChild('scannedImg') private scannedImg: ElementRef;
   @ViewChild('myCanvas') private myCanvas: ElementRef;
+  @ViewChild('File') private File: ElementRef;
+
   public context: CanvasRenderingContext2D;
 
   ngOnInit() {
@@ -61,9 +63,9 @@ export class OcrComponent implements OnInit {
   // }
 
   testCanvas() {
-    var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('myCanvas');
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
-    this.img = document.getElementById("scream");
+    this.img = this.scannedImg.nativeElement;
     // {width: 441, height: 175}
     smartcrop.crop(this.img, {width: 250, height: 250, minScale: 0.5, ruleOfThirds: true}, result => {
       this.podatoci = result.topCrop;
@@ -84,11 +86,13 @@ export class OcrComponent implements OnInit {
     })
   }
   testCanvas1() {
-    var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('myCanvas');
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
-    this.img = document.getElementById("scream");
+    this.img = this.scannedImg.nativeElement;
     // {width: 440, height: 170}
-    smartcrop.crop(this.img, {width: 381, height: 192, minScale: 0.5,}, result => {
+    // smartcrop.crop(this.img, {width: 381, height: 192, minScale: 0.5,}, result => {
+
+      smartcrop.crop(this.img, {width: 381, height: 192, minScale: 0.5,}, result => {
       this.podatoci = result.topCrop;
       this.x = result.topCrop.x;
       this.y = result.topCrop.y
@@ -107,9 +111,9 @@ export class OcrComponent implements OnInit {
     })
   }
   testCanvas2() {
-    var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('myCanvas');
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
-    this.img = document.getElementById("scream");
+    this.img = this.scannedImg.nativeElement;
     // {width: 440, height: 170}
     smartcrop.crop(this.img, {width: 250, height: 250, minScale: 0.5}, result => {
       this.podatoci = result.topCrop;
@@ -153,7 +157,6 @@ export class OcrComponent implements OnInit {
   }
 
   runOCR() {
-    console.log(this.scannedImg.nativeElement.src)
     Tesseract.recognize(this.scannedImg.nativeElement.src, {
       lang: this.levelNum
     })
@@ -177,15 +180,15 @@ export class OcrComponent implements OnInit {
       })
   }
 
-  readUrl(event) {
-    // console.log(event)
-    if (event.target.files && event.target.files[0]) {
+  readUrl() {
+    if (this.File.nativeElement.files && this.File.nativeElement.files[0]) {
       let reader = new FileReader();
-
-      reader.onload = (event: any) => {
-        this.url = event.target.result;
+      reader.onload = (url: any) => {
+        // console.log(this.File.nativeElement.src, '#')
+        this.url = url.target.result;
+        console.log(this.url)
       }
-      reader.readAsDataURL(event.target.files[0]);
+      reader.readAsDataURL(this.File.nativeElement.files[0]);
     }
   }
 
@@ -195,11 +198,11 @@ export class OcrComponent implements OnInit {
 
   test(){
     //create canvas
-    var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('myCanvas');
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     //get its context
     var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
     //start to load image from src url
-    this.img = document.getElementById("scream");
+    this.img = this.scannedImg.nativeElement;
     //resize canvas up to size image size
     canvas.width = this.img.width;
     canvas.height = this.img.height;
@@ -231,11 +234,11 @@ export class OcrComponent implements OnInit {
   // contrast
   test2(){
     //create canvas
-    var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('myCanvas');
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     //get its context
     var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
     //start to load image from src url
-    this.img = document.getElementById("scream");
+    this.img = this.scannedImg.nativeElement;
     //resize canvas up to size image size
     canvas.width = this.img.width;
     canvas.height = this.img.height;
@@ -266,17 +269,16 @@ export class OcrComponent implements OnInit {
   // brightness
   test3(){
     //create canvas
-    var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('myCanvas');
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     //get its context
     var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
     //start to load image from src url
-    this.img = document.getElementById("scream");
+    this.img = this.scannedImg.nativeElement;
     //resize canvas up to size image size
     canvas.width = this.img.width;
     canvas.height = this.img.height;
     //draw image on canvas, full canvas API is described here http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
     ctx.drawImage(this.img, 0, 0);
-
     var imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
     let brightness = -10
@@ -286,6 +288,25 @@ export class OcrComponent implements OnInit {
       imgPixels.data[i+2] -= brightness  ;
     }
 
+    //draw pixels according to computed colors
+    ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+    // return canvas.toDataURL();
+    this.url = canvas.toDataURL();
+  }
+
+  scaleImg(){
+    //create canvas
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
+    //get its context
+    var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+    //start to load image from src url
+    this.img = this.scannedImg.nativeElement;
+    //resize canvas up to size image size
+    canvas.width = this.img.width * 0.6;
+    canvas.height = this.img.height * 0.6;
+    //draw image on canvas, full canvas API is described here http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
+    ctx.drawImage(this.img, 0, 0, canvas.width, canvas.height);
+    var imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
     //draw pixels according to computed colors
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
     // return canvas.toDataURL();

@@ -8,30 +8,34 @@
 <!--&gt;</image-upload>-->
 <div class="container" style="position: center">
   <div class="row">
-    <img [src]="url"  #scannedImg id="scream"><br/>
-    <!--<img [src]="url"  #scannedImg id="scream" style="filter: grayscale(100%) contrast(200%) brightness(250%)">-->
-    <input type='file' (change)="readUrl($event)"><br/>
-    <!--<img src="../../assets/test_015.jpg" id="scream"> <br>-->
-
-    <canvas id="myCanvas" #myCanvas></canvas><br/>
-
-
     <select type="number" [(ngModel)]="levelNum" (ngModelChange)="selectLanguage()">
       <option *ngFor="let item of languages" [ngValue]="item.lang">{{item.name}}</option>
     </select>
-    {{levelNum}}
-
     <button (click)="runOCR()">OCR</button>
     <button (click)="detectOCR()">DetectOCR</button>
 
     <button (click)="test()">test</button>
     <button (click)="test2()">test2</button>
     <button (click)="test3()">test3</button>
+    <button (click)="scaleImg()">scale</button>
 
 
     <button (click)="testCanvas()">testCanvas</button>
     <button (click)="testCanvas1()">testCanvas1</button>
     <button (click)="testCanvas2()">testCanvas2</button>
+
+    <img [src]="url"  #scannedImg><br/>
+    <!--<img [src]="url"  #scannedImg id="scream" style="filter: grayscale(100%) contrast(200%) brightness(250%)">-->
+    <input type='file' (change)="readUrl()" #File><br/>
+    <!--<img src="../../assets/test_015.jpg" id="scream"> <br>-->
+
+    <canvas #myCanvas></canvas><br/>
+
+
+
+    {{levelNum}}
+
+
 
 
     <div>
