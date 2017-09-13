@@ -5,7 +5,11 @@
 <!--(onFileUploadFinish)="imageFinishedUploading($event)"-->
 <!--(onRemove)="imageRemoved($event)"-->
 <!--(isPending)="uploadStateChange($event)"-->
+<!--[headers]="myHeaders"-->
+<!--url="http://localhost:3000/plates"-->
 <!--&gt;</image-upload>-->
+
+
 <div class="container" style="position: center">
   <div class="row">
     <select type="number" [(ngModel)]="levelNum" (ngModelChange)="selectLanguage()">
@@ -18,11 +22,20 @@
     <button (click)="test2()">test2</button>
     <button (click)="test3()">test3</button>
     <button (click)="scaleImg()">scale</button>
+    <button (click)="licensePlateRecognition()">licensePlateRecognition</button>
+    <button (click)="testCoordinates()">testCoordinates</button>
+
+    <button (click)="cropLicensePlate()">crop</button>
 
 
     <button (click)="testCanvas()">testCanvas</button>
     <button (click)="testCanvas1()">testCanvas1</button>
-    <button (click)="testCanvas2()">testCanvas2</button>
+    <button (click)="testCanvas2()">testCanvas2</button><br>
+    <h1>{{licensePlateData.plate}}</h1>
+    <canvas #myCanvas></canvas><br/>
+    <h2 *ngIf="licensePlateData.confidence != null">Confidence: {{licensePlateData.confidence | number: '1.0-0'}}%</h2>
+
+
 
     <img [src]="url"  #scannedImg><br/>
     <!--<img [src]="url"  #scannedImg id="scream" style="filter: grayscale(100%) contrast(200%) brightness(250%)">-->

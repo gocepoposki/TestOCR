@@ -6,6 +6,8 @@ import {OcrComponent} from './ocr/ocr.component';
 import {FormsModule} from '@angular/forms';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ImageUploadModule} from 'angular2-image-upload';
+import {HttpClientModule} from '@angular/common/http';
+import {OcrService} from './ocr.service';
 
 @NgModule({
   declarations: [
@@ -13,11 +15,15 @@ import {ImageUploadModule} from 'angular2-image-upload';
     OcrComponent,
   ],
   imports: [
+    ImageUploadModule.forRoot(),
     BrowserModule,
     FormsModule,
     ReactiveFormsModule,
+    HttpClientModule
   ],
-  providers: [],
+  providers: [
+    OcrService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {

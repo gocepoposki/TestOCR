@@ -3,7 +3,7 @@ import {Observable} from 'rxjs/Observable';
 import * as Tesseract from 'tesseract.js';
 import {FileHolder} from "angular2-image-upload/lib/image-upload/image-upload.component";
 import * as smartcrop from '../../../node_modules/smartcrop/smartcrop.js';
-
+import {OcrService} from "../ocr.service";
 
 // import 'rxjs/add/observable/of';
 
@@ -13,7 +13,7 @@ import * as smartcrop from '../../../node_modules/smartcrop/smartcrop.js';
   styleUrls: ['./ocr.component.css']
 })
 export class OcrComponent implements OnInit {
-  constructor(private cdRef: ChangeDetectorRef) {
+  constructor(private cdRef: ChangeDetectorRef, private ocrService: OcrService) {
 
   }
 
@@ -28,7 +28,14 @@ export class OcrComponent implements OnInit {
   y: number;
   w: number;
   h: number;
-
+  licensePlateData: any = [];
+  coordinates
+  xMin
+  xMax
+  yMin
+  yMax
+  coordinatesW
+  coordinatesH
 
   selectLanguage() {
     this.levelNum = this.levelNum;
@@ -55,6 +62,23 @@ export class OcrComponent implements OnInit {
   ngOnInit() {
   }
 
+  licensePlateRecognition() {
+    this.ocrService.postImg(this.url).subscribe(data => {
+      console.log(data, 'data')
+      this.licensePlateData = data.results[0]
+      this.coordinates = data.results[0].coordinates
+      console.log(this.coordinates)
+      this.cropLicensePlate()
+    })
+  }
+  testCoordinates(){
+    // this.x = this.coordinates[0].y;
+    // this.y = this.coordinates[1].y;
+    // console.log(this.x, this.y);
+    // this.yMax = Math.max(this.coordinates[0].y, this.coordinates[1].y);
+    // this.xMin = Math.min(this.coordinates[0].x,this.coordinates[3].x);
+    // console.log(this.xMin, this.yMax);
+  }
 
   // test() {
   //   smartcrop.crop('../../assets/mak.jpg', {width: 100, height: 100}, result =>
@@ -74,7 +98,7 @@ export class OcrComponent implements OnInit {
       this.w = result.topCrop.width
       this.h = result.topCrop.height
       console.log(this.podatoci, 'podatoci');
-      ctx.canvas.width  = this.w;
+      ctx.canvas.width = this.w;
       ctx.canvas.height = this.h;
       ctx.drawImage(this.img,
         this.x, this.y,
@@ -85,6 +109,7 @@ export class OcrComponent implements OnInit {
       this.url = canvas.toDataURL();
     })
   }
+
   testCanvas1() {
     var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
@@ -92,14 +117,14 @@ export class OcrComponent implements OnInit {
     // {width: 440, height: 170}
     // smartcrop.crop(this.img, {width: 381, height: 192, minScale: 0.5,}, result => {
 
-      smartcrop.crop(this.img, {width: 381, height: 192, minScale: 0.5,}, result => {
+    smartcrop.crop(this.img, {width: 381, height: 192, minScale: 0.5,}, result => {
       this.podatoci = result.topCrop;
       this.x = result.topCrop.x;
       this.y = result.topCrop.y
       this.w = result.topCrop.width
       this.h = result.topCrop.height
       console.log(this.podatoci, 'podatoci');
-      ctx.canvas.width  = this.w;
+      ctx.canvas.width = this.w;
       ctx.canvas.height = this.h;
       ctx.drawImage(this.img,
         this.x, this.y,
@@ -110,6 +135,7 @@ export class OcrComponent implements OnInit {
       this.url = canvas.toDataURL();
     })
   }
+
   testCanvas2() {
     var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
@@ -122,7 +148,7 @@ export class OcrComponent implements OnInit {
       this.w = result.topCrop.width
       this.h = result.topCrop.height
       console.log(this.podatoci, 'podatoci');
-      ctx.canvas.width  = this.w;
+      ctx.canvas.width = this.w;
       ctx.canvas.height = this.h;
       ctx.drawImage(this.img,
         this.x, this.y,
@@ -186,17 +212,14 @@ export class OcrComponent implements OnInit {
       reader.onload = (url: any) => {
         // console.log(this.File.nativeElement.src, '#')
         this.url = url.target.result;
-        console.log(this.url)
+        // console.log(this.url)
       }
       reader.readAsDataURL(this.File.nativeElement.files[0]);
     }
   }
 
 
-
-
-
-  test(){
+  test() {
     //create canvas
     var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     //get its context
@@ -211,8 +234,8 @@ export class OcrComponent implements OnInit {
     //get array of image pixels
     var imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
     //run through all the pixels
-    for(var y = 0; y < imgPixels.height; y++){
-      for(var x = 0; x < imgPixels.width; x++){
+    for (var y = 0; y < imgPixels.height; y++) {
+      for (var x = 0; x < imgPixels.width; x++) {
         //here is x and y are multiplied by 4 because every pixel is four bytes: red, green, blue, alpha
         var i = (y * 4) * imgPixels.width + x * 4; //Why is this multiplied by 4?
         //compute average value for colors, this will convert it to bw
@@ -232,7 +255,7 @@ export class OcrComponent implements OnInit {
   }
 
   // contrast
-  test2(){
+  test2() {
     //create canvas
     var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     //get its context
@@ -267,7 +290,7 @@ export class OcrComponent implements OnInit {
 
 
   // brightness
-  test3(){
+  test3() {
     //create canvas
     var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     //get its context
@@ -283,9 +306,9 @@ export class OcrComponent implements OnInit {
 
     let brightness = -10
     for (var i = 0; i < imgPixels.data.length; i += 4) {
-      imgPixels.data[i]   -= brightness  ;
-      imgPixels.data[i+1] -= brightness  ;
-      imgPixels.data[i+2] -= brightness  ;
+      imgPixels.data[i] -= brightness;
+      imgPixels.data[i + 1] -= brightness;
+      imgPixels.data[i + 2] -= brightness;
     }
 
     //draw pixels according to computed colors
@@ -294,7 +317,7 @@ export class OcrComponent implements OnInit {
     this.url = canvas.toDataURL();
   }
 
-  scaleImg(){
+  scaleImg() {
     //create canvas
     var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
     //get its context
@@ -313,7 +336,37 @@ export class OcrComponent implements OnInit {
     this.url = canvas.toDataURL();
   }
 
+  cropLicensePlate() {
+    //create canvas
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
+    //get its context
+    var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+    //start to load image from src url
+    this.img = this.scannedImg.nativeElement;
+    //resize canvas up to size image size
+    canvas.width = this.img.width;
+    canvas.height = this.img.height;
 
+    this.yMin = Math.min(Math.min(this.coordinates[0].y,this.coordinates[1].y), Math.min(this.coordinates[2].y,this.coordinates[3].y));;
+    this.xMin = Math.min(Math.min(this.coordinates[0].x,this.coordinates[3].x), Math.min(this.coordinates[1].x,this.coordinates[2].x));
+
+    this.yMax = Math.max(Math.max(this.coordinates[0].y,this.coordinates[1].y), Math.max(this.coordinates[2].y,this.coordinates[3].y));;
+    this.xMax = Math.max(Math.max(this.coordinates[0].x,this.coordinates[3].x), Math.max(this.coordinates[1].x,this.coordinates[2].x));
+    console.log(this.xMin, this.xMax, this.yMin, this.yMax);
+    //draw image on canvas, full canvas API is described here http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
+    this.x = this.xMin;
+    this.y = this.yMin
+    this.w = this.xMax - this.xMin
+    this.h = this.yMax - this.yMin
+    // ctx.drawImage(this.img, 188, 210, 102, 20, 0, 0, 102,20
+    ctx.canvas.width = this.w;
+    ctx.canvas.height = this.h;
+    ctx.drawImage(this.img, this.x, this.y, this.w, this.h, 0, 0, this.w, this.h)
+    // ctx.drawImage(this.img, 227, 180, 150, 31, 0, 0, 150, 31
+
+    // this.url = canvas.toDataURL();
+
+  }
 
 
 }
