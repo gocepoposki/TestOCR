@@ -4,6 +4,7 @@ import * as Tesseract from 'tesseract.js';
 import {FileHolder} from "angular2-image-upload/lib/image-upload/image-upload.component";
 import * as smartcrop from '../../../node_modules/smartcrop/smartcrop.js';
 import {OcrService} from "../ocr.service";
+import {timeout} from "q";
 
 // import 'rxjs/add/observable/of';
 
@@ -36,6 +37,7 @@ export class OcrComponent implements OnInit {
   yMax
   coordinatesW
   coordinatesH
+  mklicensePlate
 
   selectLanguage() {
     this.levelNum = this.levelNum;
@@ -71,7 +73,8 @@ export class OcrComponent implements OnInit {
       this.cropLicensePlate()
     })
   }
-  testCoordinates(){
+
+  testCoordinates() {
     // this.x = this.coordinates[0].y;
     // this.y = this.coordinates[1].y;
     // console.log(this.x, this.y);
@@ -210,14 +213,60 @@ export class OcrComponent implements OnInit {
     if (this.File.nativeElement.files && this.File.nativeElement.files[0]) {
       let reader = new FileReader();
       reader.onload = (url: any) => {
-        // console.log(this.File.nativeElement.src, '#')
         this.url = url.target.result;
         // console.log(this.url)
       }
       reader.readAsDataURL(this.File.nativeElement.files[0]);
+      setTimeout(() => {
+        console.log(this.scannedImg.nativeElement.width, this.scannedImg.nativeElement.height);
+        this.scaleImg()
+      }, 1000)
+
+
     }
   }
 
+  scaleImg() {
+    //create canvas
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
+    //get its context
+    var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+    //start to load image from src url
+    this.img = this.scannedImg.nativeElement;
+    //resize canvas up to size image size
+    canvas.width = this.img.width;
+    canvas.height = this.img.height;
+    if (canvas.width > 750 || canvas.height > 750) {
+      while (canvas.width > 750 || canvas.height > 750) {
+        canvas.width = canvas.width * 0.6;
+        canvas.height = canvas.height * 0.6;
+        console.log(canvas.width, canvas.height, 'eeeeeeeeeeeeeeeeeeeeeeee')
+      }
+      console.log(canvas.width, canvas.height, 'pomina 1')
+      //draw image on canvas, full canvas API is described here http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
+      ctx.drawImage(this.img, 0, 0, canvas.width, canvas.height);
+      var imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      //draw pixels according to computed colors
+      ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+      // return canvas.toDataURL();
+      this.url = canvas.toDataURL();
+    }
+    this.licensePlateRecognition()
+
+  }
+
+  mkChecklicensePlate() {
+    console.log(this.licensePlateData.candidates[0].plate)
+
+    this.mklicensePlate = this.licensePlateData.candidates[0].plate.slice(2, 6)
+    console.log(this.mklicensePlate)
+    if (this.mklicensePlate.match(/^[0-9]*$/)) {
+      this.mklicensePlate = this.licensePlateData.candidates[0].plate
+    }
+    else
+      this.mklicensePlate = this.licensePlateData.candidates[1].plate
+
+  }
 
   test() {
     //create canvas
@@ -317,24 +366,6 @@ export class OcrComponent implements OnInit {
     this.url = canvas.toDataURL();
   }
 
-  scaleImg() {
-    //create canvas
-    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
-    //get its context
-    var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
-    //start to load image from src url
-    this.img = this.scannedImg.nativeElement;
-    //resize canvas up to size image size
-    canvas.width = this.img.width * 0.6;
-    canvas.height = this.img.height * 0.6;
-    //draw image on canvas, full canvas API is described here http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
-    ctx.drawImage(this.img, 0, 0, canvas.width, canvas.height);
-    var imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    //draw pixels according to computed colors
-    ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
-    // return canvas.toDataURL();
-    this.url = canvas.toDataURL();
-  }
 
   cropLicensePlate() {
     //create canvas
@@ -347,11 +378,13 @@ export class OcrComponent implements OnInit {
     canvas.width = this.img.width;
     canvas.height = this.img.height;
 
-    this.yMin = Math.min(Math.min(this.coordinates[0].y,this.coordinates[1].y), Math.min(this.coordinates[2].y,this.coordinates[3].y));;
-    this.xMin = Math.min(Math.min(this.coordinates[0].x,this.coordinates[3].x), Math.min(this.coordinates[1].x,this.coordinates[2].x));
+    this.yMin = Math.min(Math.min(this.coordinates[0].y, this.coordinates[1].y), Math.min(this.coordinates[2].y, this.coordinates[3].y));
+    ;
+    this.xMin = Math.min(Math.min(this.coordinates[0].x, this.coordinates[3].x), Math.min(this.coordinates[1].x, this.coordinates[2].x));
 
-    this.yMax = Math.max(Math.max(this.coordinates[0].y,this.coordinates[1].y), Math.max(this.coordinates[2].y,this.coordinates[3].y));;
-    this.xMax = Math.max(Math.max(this.coordinates[0].x,this.coordinates[3].x), Math.max(this.coordinates[1].x,this.coordinates[2].x));
+    this.yMax = Math.max(Math.max(this.coordinates[0].y, this.coordinates[1].y), Math.max(this.coordinates[2].y, this.coordinates[3].y));
+    ;
+    this.xMax = Math.max(Math.max(this.coordinates[0].x, this.coordinates[3].x), Math.max(this.coordinates[1].x, this.coordinates[2].x));
     console.log(this.xMin, this.xMax, this.yMin, this.yMax);
     //draw image on canvas, full canvas API is described here http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
     this.x = this.xMin;
@@ -365,7 +398,7 @@ export class OcrComponent implements OnInit {
     // ctx.drawImage(this.img, 227, 180, 150, 31, 0, 0, 150, 31
 
     // this.url = canvas.toDataURL();
-
+    this.mkChecklicensePlate()
   }
 
 

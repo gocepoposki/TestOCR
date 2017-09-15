@@ -24,17 +24,29 @@
     <button (click)="scaleImg()">scale</button>
     <button (click)="licensePlateRecognition()">licensePlateRecognition</button>
     <button (click)="testCoordinates()">testCoordinates</button>
-
     <button (click)="cropLicensePlate()">crop</button>
-
-
     <button (click)="testCanvas()">testCanvas</button>
     <button (click)="testCanvas1()">testCanvas1</button>
     <button (click)="testCanvas2()">testCanvas2</button><br>
-    <h1>{{licensePlateData.plate}}</h1>
-    <canvas #myCanvas></canvas><br/>
-    <h2 *ngIf="licensePlateData.confidence != null">Confidence: {{licensePlateData.confidence | number: '1.0-0'}}%</h2>
+    <button (click)="mkChecklicensePlate()">mklicensePlate</button><br>
 
+
+    <div class="row">
+      <div class="col-md-4">
+        <h1 *ngIf="licensePlateData.plate != null" >{{this.mklicensePlate}}</h1>
+
+        <canvas #myCanvas></canvas><br/>
+
+        <h2 *ngIf="licensePlateData.confidence != null">Confidence: {{licensePlateData.candidates[0].confidence | number: '1.0-0'}}%</h2>
+      </div>
+        <div class="col-md-4">
+          <ul>
+            <li *ngFor="let item of licensePlateData.candidates">
+              {{item.plate}}
+            </li>
+          </ul>
+        </div>
+    </div>
 
 
     <img [src]="url"  #scannedImg><br/>
