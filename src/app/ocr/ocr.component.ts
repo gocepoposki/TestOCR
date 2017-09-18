@@ -257,14 +257,26 @@ export class OcrComponent implements OnInit {
 
   mkChecklicensePlate() {
     console.log(this.licensePlateData.candidates[0].plate)
-
-    this.mklicensePlate = this.licensePlateData.candidates[0].plate.slice(2, 6)
-    console.log(this.mklicensePlate)
-    if (this.mklicensePlate.match(/^[0-9]*$/)) {
-      this.mklicensePlate = this.licensePlateData.candidates[0].plate
+    if (this.licensePlateData.candidates[0].plate.length == 8) {
+      this.mklicensePlate = this.licensePlateData.candidates[0].plate.slice(2, 6)
+      console.log(this.mklicensePlate)
+      if (this.mklicensePlate.match(/^[0-9]*$/)) {
+        this.mklicensePlate = this.licensePlateData.candidates[0].plate
+      }
+      else
+        this.mklicensePlate = this.licensePlateData.candidates[1].plate
+    }
+    else if (this.licensePlateData.candidates[0].plate == 7) {
+      this.mklicensePlate = this.licensePlateData.candidates[0].plate.slice(2, 5)
+      if (this.mklicensePlate.match(/^[0-9]*$/)) {
+        this.mklicensePlate = this.licensePlateData.candidates[0].plate
+      }
+      else
+        this.mklicensePlate = this.licensePlateData.candidates[1].plate
     }
     else
-      this.mklicensePlate = this.licensePlateData.candidates[1].plate
+      this.mklicensePlate = this.licensePlateData.candidates[0].plate
+
 
   }
 
