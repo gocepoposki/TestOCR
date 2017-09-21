@@ -8,7 +8,7 @@ export class OcrService {
   constructor(private http: Http) {
   }
 
-  private baseUrl = "http://localhost:3000/plates";
+  private baseUrl = "http://10.0.0.14:3000/plates";
   private getHeaders: Headers = new Headers({'Content-Type': 'application/json'});
 
   postImg(img) {

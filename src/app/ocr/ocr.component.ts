@@ -1,10 +1,11 @@
-import {ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, QueryList, ViewChildren} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import * as Tesseract from 'tesseract.js';
 import {FileHolder} from "angular2-image-upload/lib/image-upload/image-upload.component";
 import * as smartcrop from '../../../node_modules/smartcrop/smartcrop.js';
 import {OcrService} from "../ocr.service";
 import {timeout} from "q";
+
 
 // import 'rxjs/add/observable/of';
 
@@ -38,6 +39,7 @@ export class OcrComponent implements OnInit {
   coordinatesW
   coordinatesH
   mklicensePlate
+  imgVideo
 
   selectLanguage() {
     this.levelNum = this.levelNum;
@@ -57,9 +59,71 @@ export class OcrComponent implements OnInit {
 
   @ViewChild('scannedImg') private scannedImg: ElementRef;
   @ViewChild('myCanvas') private myCanvas: ElementRef;
+  @ViewChild('myCanvasVideo') private myCanvasVideo: ElementRef;
   @ViewChild('File') private File: ElementRef;
 
-  public context: CanvasRenderingContext2D;
+  @ViewChild('video') video: ElementRef;
+
+  // ngAfterViewInit() {
+  //
+  //   let _video = this.video.nativeElement;
+  //   var n = <any>navigator;
+  //   n.getUserMedia = n.getUserMedia || n.webkitGetUserMedia || n.mozGetUserMedia || n.msGetUserMedia;
+  //
+  //   if (n.getUserMedia) {
+  //     n.getUserMedia({video: true, audio: false},
+  //       function (stream) {
+  //         _video.src = window.URL.createObjectURL(stream);
+  //         _video.play();
+  //       },
+  //       function (error) {
+  //       })
+  //   }
+  // }
+
+
+  ngAfterViewInit() {
+    let _video=this.video.nativeElement;
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          _video.src = window.URL.createObjectURL(stream);
+          _video.play();
+        })
+        .catch(e => console.error(e))
+    }
+  }
+  videoScreenShot() {
+    //create canvas
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvasVideo.nativeElement;
+    //get its context
+    var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+    //start to load image from src url
+    this.imgVideo = this.video.nativeElement;
+    //resize canvas up to size image size
+    canvas.width = this.imgVideo.width;
+    canvas.height = this.imgVideo.height;
+
+    // horizontal flip
+    // ctx.translate(canvas.width, 0);
+    // ctx.scale(-1, 1);
+
+    // vertical flip za mobilni telefoni
+    // ctx.scale(1,-1);
+    // ctx.translate(0, -canvas.height);
+
+    //draw image on canvas, full canvas API is described here http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
+    setInterval(data => {
+      ctx.drawImage(this.imgVideo, 0, 0, canvas.width, canvas.height);
+      this.url = canvas.toDataURL()
+      this.licensePlateRecognition()
+
+    }, 1000);
+    // 1000 / 30 za 30 frames per secund
+
+    // return canvas.toDataURL();
+    // this.myCanvasVideo = canvas.toDataURL();
+  }
 
   ngOnInit() {
   }
@@ -69,10 +133,10 @@ export class OcrComponent implements OnInit {
       console.log(data, 'data')
       this.licensePlateData = data.results[0]
       this.coordinates = data.results[0].coordinates
-      console.log(this.coordinates)
       this.cropLicensePlate()
     })
   }
+
 
   testCoordinates() {
     // this.x = this.coordinates[0].y;
@@ -240,13 +304,11 @@ export class OcrComponent implements OnInit {
       while (canvas.width > 750 || canvas.height > 750) {
         canvas.width = canvas.width * 0.6;
         canvas.height = canvas.height * 0.6;
-        console.log(canvas.width, canvas.height, 'eeeeeeeeeeeeeeeeeeeeeeee')
       }
-      console.log(canvas.width, canvas.height, 'pomina 1')
       //draw image on canvas, full canvas API is described here http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
       ctx.drawImage(this.img, 0, 0, canvas.width, canvas.height);
-      var imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      //draw pixels according to computed colors
+      let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      // draw pixels according to computed colors
       ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
       // return canvas.toDataURL();
       this.url = canvas.toDataURL();
@@ -256,26 +318,30 @@ export class OcrComponent implements OnInit {
   }
 
   mkChecklicensePlate() {
-    console.log(this.licensePlateData.candidates[0].plate)
-    if (this.licensePlateData.candidates[0].plate.length == 8) {
-      this.mklicensePlate = this.licensePlateData.candidates[0].plate.slice(2, 6)
-      console.log(this.mklicensePlate)
+    if (this.licensePlateData.candidates[0].plate.length === 8) {
+      this.mklicensePlate = this.licensePlateData.candidates[0].plate.slice(2, 6);
       if (this.mklicensePlate.match(/^[0-9]*$/)) {
-        this.mklicensePlate = this.licensePlateData.candidates[0].plate
+        this.mklicensePlate = this.licensePlateData.candidates[0].plate;
       }
-      else
-        this.mklicensePlate = this.licensePlateData.candidates[1].plate
+      else {
+        this.mklicensePlate = this.licensePlateData.candidates[1].plate;
+      }
     }
-    else if (this.licensePlateData.candidates[0].plate == 7) {
-      this.mklicensePlate = this.licensePlateData.candidates[0].plate.slice(2, 5)
+
+    else if (this.licensePlateData.candidates[0].plate.length === 7) {
+      this.mklicensePlate = this.licensePlateData.candidates[0].plate.slice(2, 5);
       if (this.mklicensePlate.match(/^[0-9]*$/)) {
-        this.mklicensePlate = this.licensePlateData.candidates[0].plate
+        this.mklicensePlate = this.licensePlateData.candidates[0].plate;
       }
-      else
-        this.mklicensePlate = this.licensePlateData.candidates[1].plate
+      else {
+        this.mklicensePlate = this.licensePlateData.candidates[1].plate;
+      }
+
     }
-    else
+
+    else {
       this.mklicensePlate = this.licensePlateData.candidates[0].plate
+    }
 
 
   }
@@ -411,6 +477,25 @@ export class OcrComponent implements OnInit {
 
     // this.url = canvas.toDataURL();
     this.mkChecklicensePlate()
+  }
+
+  flipPicture() {
+    //create canvas
+    var canvas: HTMLCanvasElement = <HTMLCanvasElement> this.myCanvas.nativeElement;
+    //get its context
+    var ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+    //start to load image from src url
+    this.img = this.scannedImg.nativeElement;
+    //resize canvas up to size image size
+    canvas.width = this.img.width;
+    canvas.height = this.img.height;
+
+
+
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+
+      ctx.drawImage(this.img, 0, 0,);
   }
 
 

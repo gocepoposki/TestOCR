@@ -8,6 +8,8 @@
 <!--[headers]="myHeaders"-->
 <!--url="http://localhost:3000/plates"-->
 <!--&gt;</image-upload>-->
+<video #video width="640" height="480" autoplay></video>
+<canvas #myCanvasVideo></canvas><br/>
 
 
 <div class="container" style="position: center">
@@ -28,7 +30,10 @@
     <button (click)="testCanvas()">testCanvas</button>
     <button (click)="testCanvas1()">testCanvas1</button>
     <button (click)="testCanvas2()">testCanvas2</button><br>
-    <button (click)="mkChecklicensePlate()">mklicensePlate</button><br>
+    <button (click)="mkChecklicensePlate()">mklicensePlate</button>
+    <button (click)="videoScreenShot()">videoScreenShot</button>
+    <button (click)="startVideo()">startVideo</button>
+    <button (click)="flipPicture()">flipPicture</button>
 
 
     <div class="row">
